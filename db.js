@@ -5,7 +5,7 @@ const connection = mysql.createConnection({
   user: 'root',
   password: 'RBRPfwkUhiYBAGyNuLMArVAdqYSZhMoU', // si tu MySQL tiene contraseña, ponla aquí
   database: 'railway', // asegúrate de que esta base existe
-  port; 27387
+  port: 27387
 });
 
 connection.connect((err) => {
