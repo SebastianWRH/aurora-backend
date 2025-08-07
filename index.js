@@ -56,6 +56,7 @@ app.post('/registro', async (req, res) => {
     return res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 }
+});
 
 
 
