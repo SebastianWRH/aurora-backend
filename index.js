@@ -35,13 +35,14 @@ app.post('/registro', async (req, res) => {
     nombre, correo, hashed, celular, departamento,
     provincia, distrito, direccion, tipo_documento, numero_documento, rol
   ], (err) => {
+
     if (err) {
       console.error('Error al registrar:', err);
       return res.status(500).json({ mensaje: 'Error al registrar' });
     }
     res.status(200).json({ mensaje: 'Usuario registrado con éxito' });
   });
-
+});
 
 // LOGIN
 app.post('/login', (req, res) => {
