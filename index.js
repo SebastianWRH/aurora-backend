@@ -11,8 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // REGISTRO
 app.post('/registro', async (req, res) => {
-  console.log('📥 Datos recibidos en /registro:', req.body);
-  const rol = 'cliente'; // o req.body.rol si quieres que lo elijan manualmente
+  const rol = 'cliente';
   const {
     nombre, correo, contrasena, confirmar,
     celular, departamento, provincia, distrito,
@@ -24,7 +23,7 @@ app.post('/registro', async (req, res) => {
   }
 
   try {
-    // Verificar si el correo ya está registrado
+    // Verificar si el correo ya existe
     const [rows] = await connection.promise().query(
       'SELECT id FROM usuarios WHERE correo = ?',
       [correo]
@@ -34,7 +33,6 @@ app.post('/registro', async (req, res) => {
       return res.status(409).json({ mensaje: 'Este correo ya está registrado' });
     }
 
-    // Encriptar contraseña
     const hashed = await bcrypt.hash(contrasena, 10);
 
     const query = `
@@ -49,12 +47,12 @@ app.post('/registro', async (req, res) => {
     ]);
 
     res.status(200).json({ mensaje: 'Usuario registrado con éxito' });
-
   } catch (err) {
     console.error('❌ Error al registrar:', err);
-    res.status(500).json({ mensaje: 'Error interno al registrar' });
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 });
+
 
 
 // LOGIN
