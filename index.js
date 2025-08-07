@@ -24,14 +24,6 @@ app.post('/registro', async (req, res) => {
 
   try {
     // Verificar si el correo ya existe
-    const [rows] = await connection.promise().query(
-      'SELECT id FROM usuarios WHERE correo = ?',
-      [correo]
-    );
-
-    if (rows.length > 0) {
-      return res.status(409).json({ mensaje: 'Este correo ya está registrado' });
-    }
 
     const hashed = await bcrypt.hash(contrasena, 10);
 
