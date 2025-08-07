@@ -387,3 +387,37 @@ app.get('/stock/:id_producto', (req, res) => {
     res.json(results[0]); // { id: X, stock: Y }
   });
 });
+
+
+
+
+
+
+
+
+// Obtener todos los usuarios
+app.get('/usuarios', async (req, res) => {
+  try {
+    const [rows] = await connection.promise().query('SELECT id, nombre, correo, rol FROM usuarios');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+  }
+});
+
+// Actualizar usuario
+app.put('/usuarios/:id', async (req, res) => {
+  const { id } = req.params;
+  const { nombre, correo, rol } = req.body;
+
+  try {
+    await connection.promise().query(
+      'UPDATE usuarios SET nombre = ?, correo = ?, rol = ? WHERE id = ?',
+      [nombre, correo, rol, id]
+    );
+    res.json({ mensaje: 'Usuario actualizado correctamente' });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error al actualizar usuario' });
+  }
+});
+
