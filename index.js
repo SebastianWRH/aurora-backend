@@ -48,15 +48,15 @@ app.post('/registro', async (req, res) => {
 
     res.status(200).json({ mensaje: 'Usuario registrado con éxito' });
   } catch (err) {
-    console.error('❌ Error al registrar:', err);
+  console.error('❌ Error al registrar:', err);
 
-    if (err.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({ mensaje: 'Este correo ya está registrado' });
-    }
-
-    res.status(500).json({ mensaje: 'Error interno del servidor' });
+  if (err.code === 'ER_DUP_ENTRY') {
+    return res.status(409).json({ mensaje: 'Este correo ya está registrado' });
+  } else {
+    return res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
-});
+}
+
 
 
 // LOGIN
