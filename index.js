@@ -23,26 +23,39 @@ app.post('/registro', async (req, res) => {
     return res.status(400).json({ mensaje: 'Las contraseñas no coinciden' });
   }
 
-  const hashed = await bcrypt.hash(contrasena, 10);
+  try {
+    // Verificar si el correo ya está registrado
+    const [rows] = await connection.promise().query(
+      'SELECT id FROM usuarios WHERE correo = ?',
+      [correo]
+    );
 
-  const query = `
-    INSERT INTO usuarios
-    (nombre, correo, contrasena, celular, departamento, provincia, distrito, direccion, tipo_documento, numero_documento, rol)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  connection.query(query, [
-    nombre, correo, hashed, celular, departamento,
-    provincia, distrito, direccion, tipo_documento, numero_documento, rol
-  ], (err) => {
-
-    if (err) {
-      console.error('Error al registrar:', err);
-      return res.status(500).json({ mensaje: 'Error al registrar' });
+    if (rows.length > 0) {
+      return res.status(409).json({ mensaje: 'Este correo ya está registrado' });
     }
+
+    // Encriptar contraseña
+    const hashed = await bcrypt.hash(contrasena, 10);
+
+    const query = `
+      INSERT INTO usuarios
+      (nombre, correo, contrasena, celular, departamento, provincia, distrito, direccion, tipo_documento, numero_documento, rol)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    await connection.promise().query(query, [
+      nombre, correo, hashed, celular, departamento,
+      provincia, distrito, direccion, tipo_documento, numero_documento, rol
+    ]);
+
     res.status(200).json({ mensaje: 'Usuario registrado con éxito' });
-  });
+
+  } catch (err) {
+    console.error('❌ Error al registrar:', err);
+    res.status(500).json({ mensaje: 'Error interno al registrar' });
+  }
 });
+
 
 // LOGIN
 app.post('/login', (req, res) => {
