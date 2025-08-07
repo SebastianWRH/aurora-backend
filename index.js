@@ -49,17 +49,14 @@ app.post('/registro', async (req, res) => {
     res.status(200).json({ mensaje: 'Usuario registrado con éxito' });
   } catch (err) {
   console.error('❌ Error al registrar:', err);
-  console.error('🧠 Código de error:', err.code);
-  console.error('🔢 Errno:', err.errno);
+  console.error('Código de error:', err.code);
 
-  if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
-  console.log('🛑 ERROR CAPTURADO: Correo duplicado detectado en el CATCH');
+if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
   return res.status(409).json({ mensaje: 'Este correo ya está registrado (desde catch)' });
 }
 
   return res.status(500).json({ mensaje: 'Error interno del servidor' });
 }
-
 
 });
 
