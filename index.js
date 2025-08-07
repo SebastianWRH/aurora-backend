@@ -44,8 +44,8 @@ app.post('/registro', async (req, res) => {
 
   const mensajeError = err?.sqlMessage || err?.message || '';
 
-  if (mensajeError.includes('Duplicate entry')) {
-    console.log('🛑 Capturado por contenido del mensaje');
+  if (err.code === 'ER_DUP_ENTRY' || mensajeError.includes('Duplicate entry')) {
+    console.log('🛑 Correo duplicado detectado');
     return res.status(409).json({ mensaje: 'Este correo ya está registrado' });
   }
 
