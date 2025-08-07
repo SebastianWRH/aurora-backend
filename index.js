@@ -11,53 +11,50 @@ app.use(express.urlencoded({ extended: true }));
 
 // REGISTRO
 app.post('/registro', async (req, res) => {
-  const rol = 'cliente';
   const {
     nombre, correo, contrasena, confirmar,
-    celular, departamento, provincia, distrito,
-    direccion, tipo_documento, numero_documento
+    celular, departamento, provincia, direccion,
+    tipo_documento, numero_documento, distrito
   } = req.body;
 
-  if (contrasena !== confirmar) {
-    return res.status(400).json({ mensaje: 'Las contraseñas no coinciden' });
-  }
-
   try {
-    // Verificar si el correo ya existe
-    const [rows] = await connection.promise().query(
-      'SELECT id FROM usuarios WHERE correo = ?',
-      [correo]
-    );
-
-    if (rows.length > 0) {
-      return res.status(409).json({ mensaje: 'Este correo ya está registrado' });
+    // Validar campos obligatorios (puedes mejorar esto)
+    if (!nombre || !correo || !contrasena || !confirmar || !numero_documento) {
+      return res.status(400).json({ mensaje: 'Faltan campos obligatorios' });
     }
 
-    const hashed = await bcrypt.hash(contrasena, 10);
+    if (contrasena !== confirmar) {
+      return res.status(400).json({ mensaje: 'Las contraseñas no coinciden' });
+    }
 
-    const query = `
-      INSERT INTO usuarios
-      (nombre, correo, contrasena, celular, departamento, provincia, distrito, direccion, tipo_documento, numero_documento, rol)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    // Verificar si el correo ya existe
+    const [correoExiste] = await connection.query('SELECT * FROM usuarios WHERE correo = ?', [correo]);
+    if (correoExiste.length > 0) {
+      return res.status(400).json({ mensaje: 'El correo ya está registrado' });
+    }
 
-    await connection.promise().query(query, [
-      nombre, correo, hashed, celular, departamento,
-      provincia, distrito, direccion, tipo_documento, numero_documento, rol
-    ]);
+    // Hashear la contraseña
+    const hash = await bcrypt.hash(contrasena, 10);
 
-    res.status(200).json({ mensaje: 'Usuario registrado con éxito' });
-  } catch (err) {
-  console.error('❌ Error al registrar:', err);
+    const rol = 'cliente'; // Se asigna automáticamente
 
-  if (err.code === 'ER_DUP_ENTRY') {
-    return res.status(409).json({ mensaje: 'Este correo ya está registrado' });
+    await connection.query(
+      `INSERT INTO usuarios 
+      (nombre, correo, contrasena, celular, departamento, provincia, direccion, tipo_documento, numero_documento, distrito, rol) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nombre, correo, hash, celular, departamento, provincia, direccion, tipo_documento, numero_documento, distrito, rol]
+    );
+
+    return res.status(200).json({ mensaje: 'Registro exitoso' });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ mensaje: 'Ese correo ya está registrado' });
+    }
+
+    console.error('Error en /registro:', error);
+    return res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
-
-  res.status(500).json({ mensaje: 'Error interno del servidor' });
-}
 });
-  
 
 
 // LOGIN
