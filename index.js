@@ -352,24 +352,6 @@ app.get('/pedido/:id', (req, res) => {
   });
 });
 
-// (Opcional) Obtener todos los pedidos (por ejemplo para admin)
-app.get('/pedidos', (req, res) => {
-  const q = `
-    SELECT p.id, p.id_usuario, p.total, p.fecha, p.estado, u.nombre as cliente
-    FROM pedidos p
-    LEFT JOIN usuarios u ON p.id_usuario = u.id
-    ORDER BY p.id DESC
-  `;
-  connection.query(q, (err, results) => {
-    if (err) {
-      console.error('Error al obtener todos los pedidos:', err.message);
-      return res.status(500).json({ mensaje: 'Error al obtener pedidos' });
-    }
-    res.json(results);
-  });
-});
-
-
 
 
 // --- Ruta para consultar stock de un producto (Paso 1) ---
@@ -401,3 +383,37 @@ app.get('/usuarios', (req, res) => {
   });
 });
 
+
+
+// Obtener todos los productos
+app.get('/productos', (req, res) => {
+  const sql = 'SELECT * FROM productos';
+  connection.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error al obtener productos:", err);
+      return res.status(500).json({ mensaje: 'Error al obtener productos' });
+    }
+    res.json({ productos: results });
+  });
+});
+
+
+
+// Eliminar un producto por ID
+app.delete('/productos/:id', (req, res) => {
+  const id = req.params.id;
+  const sql = 'DELETE FROM productos WHERE id = ?';
+
+  connection.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error("Error al eliminar producto:", err);
+      return res.status(500).json({ error: 'Error al eliminar producto' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
+    res.json({ mensaje: 'Producto eliminado correctamente' });
+  });
+});
