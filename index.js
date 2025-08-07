@@ -53,8 +53,9 @@ app.post('/registro', async (req, res) => {
   console.error('🔢 Errno:', err.errno);
 
   if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
-    return res.status(409).json({ mensaje: 'Este correo ya está registrado (desde catch)' });
-  }
+  console.log('🛑 ERROR CAPTURADO: Correo duplicado detectado en el CATCH');
+  return res.status(409).json({ mensaje: 'Este correo ya está registrado (desde catch)' });
+}
 
   return res.status(500).json({ mensaje: 'Error interno del servidor' });
 }
