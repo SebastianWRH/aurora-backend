@@ -401,19 +401,3 @@ app.get('/usuarios', (req, res) => {
   });
 });
 
-
-
-
-
-
-// Obtener todos los productos
-app.get('/productos', (req, res) => {
-  const sql = 'SELECT * FROM productos';
-  connection.query(sql, (err, results) => {
-    if (err) {
-      console.error("Error al obtener productos:", err);
-      return res.status(500).json({ mensaje: 'Error al obtener productos' });
-    }
-    res.json({ productos: results });
-  });
-});
