@@ -389,15 +389,15 @@ app.get('/stock/:id_producto', (req, res) => {
 });
 
 
+// RUTA PARA OBTENER TODOS LOS USUARIOS
+app.get('/usuarios', (req, res) => {
+  connection.query('SELECT id, nombre, correo, rol FROM usuarios', (err, results) => {
+    if (err) {
+      console.error('Error al obtener usuarios:', err);
+      return res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+    }
 
-
-// Obtener todos los usuarios (solo para admin)
-app.get('/usuarios', async (req, res) => {
-  try {
-    const [rows] = await connection.promise().query('SELECT nombre, correo, rol FROM usuarios');
-    res.json({ usuarios: rows });
-  } catch (error) {
-    console.error('Error al obtener usuarios:', error);
-    res.status(500).json({ mensaje: 'Error interno del servidor' });
-  }
+    res.json({ usuarios: results });
+  });
 });
+
