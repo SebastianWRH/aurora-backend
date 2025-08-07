@@ -403,19 +403,17 @@ app.get('/usuarios', (req, res) => {
 
 
 
-app.delete('/usuarios/:id', (req, res) => {
-  const id = req.params.id;
 
-  connection.query('DELETE FROM usuarios WHERE id = ?', [id], (err, result) => {
+
+
+// Obtener todos los productos
+app.get('/productos', (req, res) => {
+  const sql = 'SELECT * FROM productos';
+  connection.query(sql, (err, results) => {
     if (err) {
-      console.error("Error al eliminar usuario:", err);
-      return res.status(500).json({ error: "Error en el servidor" });
+      console.error("Error al obtener productos:", err);
+      return res.status(500).json({ mensaje: 'Error al obtener productos' });
     }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
-    }
-
-    res.json({ mensaje: "Usuario eliminado correctamente" });
+    res.json({ productos: results });
   });
 });
