@@ -12,6 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 // REGISTRO
 app.post('/registro', async (req, res) => {
   console.log('📥 Datos recibidos en /registro:', req.body);
+  const rol = 'cliente'; // o req.body.rol si quieres que lo elijan manualmente
   const {
     nombre, correo, contrasena, confirmar,
     celular, departamento, provincia, distrito,
@@ -26,13 +27,13 @@ app.post('/registro', async (req, res) => {
 
   const query = `
     INSERT INTO usuarios
-    (nombre, correo, contrasena, celular, departamento, provincia, distrito, direccion, tipo_documento, numero_documento)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (nombre, correo, contrasena, celular, departamento, provincia, distrito, direccion, tipo_documento, numero_documento, rol)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   connection.query(query, [
     nombre, correo, hashed, celular, departamento,
-    provincia, distrito, direccion, tipo_documento, numero_documento
+    provincia, distrito, direccion, tipo_documento, numero_documento, rol
   ], (err) => {
     if (err) {
       console.error('Error al registrar:', err);
@@ -40,7 +41,7 @@ app.post('/registro', async (req, res) => {
     }
     res.status(200).json({ mensaje: 'Usuario registrado con éxito' });
   });
-});
+
 
 // LOGIN
 app.post('/login', (req, res) => {
