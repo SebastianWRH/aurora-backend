@@ -391,10 +391,7 @@ app.get('/stock/:id_producto', (req, res) => {
 
 
 
-
-
-
-
+// Obtener todos los usuarios (solo para admin)
 app.get('/usuarios', async (req, res) => {
   try {
     const [rows] = await connection.promise().query('SELECT nombre, correo, rol FROM usuarios');
@@ -404,5 +401,3 @@ app.get('/usuarios', async (req, res) => {
     res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 });
-
-
