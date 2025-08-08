@@ -422,26 +422,29 @@ app.post('/productos', async (req, res) => {
   try {
     const { nombre, descripcion, precio, categoria, stock, miniatura, imagenes } = req.body;
 
+    const valores = [nombre, descripcion, precio, categoria, stock, miniatura, JSON.stringify(imagenes)];
+
     const query = `
       INSERT INTO productos (nombre, descripcion, precio, categoria, stock, miniatura, imagenes)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const valores = [nombre, descripcion, precio, categoria, stock, miniatura, JSON.stringify(imagenes)];
-
     connection.query(query, valores, (error, results) => {
       if (error) {
-        console.error('Error al agregar producto:', error);
-        return res.status(500).json({ mensaje: 'Error al agregar producto' });
+        // 🔥 Manda el mensaje de error al cliente
+        return res.status(500).json({
+          mensaje: 'Error al agregar producto',
+          detalle: error.message, // 👈 Aquí aparece el error real
+        });
       }
 
       res.status(201).json({ mensaje: 'Producto agregado correctamente' });
     });
   } catch (error) {
-    console.error('Error inesperado:', error);
-    res.status(500).json({ mensaje: 'Error inesperado del servidor' });
+    res.status(500).json({ mensaje: 'Error inesperado', detalle: error.message });
   }
 });
+
 
 
 
