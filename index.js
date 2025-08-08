@@ -401,7 +401,6 @@ app.get('/stock/:id_producto', (req, res) => {
 });
 
 
-// RUTA PARA OBTENER TODOS LOS USUARIOS
 app.get('/usuarios', (req, res) => {
   connection.query('SELECT id, nombre, correo, rol FROM usuarios', (err, results) => {
     if (err) {
@@ -409,9 +408,10 @@ app.get('/usuarios', (req, res) => {
       return res.status(500).json({ mensaje: 'Error al obtener usuarios' });
     }
 
-    res.json(results);
+    res.json({ usuarios: results });
   });
 });
+
 
 
 
