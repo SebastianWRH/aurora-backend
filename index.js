@@ -131,9 +131,20 @@ app.get('/productos', (req, res) => {
       console.error('Error al obtener productos:', err);
       return res.status(500).json({ mensaje: 'Error al obtener productos' });
     }
-    res.json(resultados);
+
+    const productos = resultados.map(p => {
+      try {
+        p.imagenes = JSON.parse(p.imagenes);
+      } catch {
+        p.imagenes = [];
+      }
+      return p;
+    });
+
+    res.json({ productos });
   });
 });
+
 
 // Obtener producto por id
 app.get('/producto/:id', async (req, res) => {
