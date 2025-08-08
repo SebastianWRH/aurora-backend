@@ -409,7 +409,7 @@ app.get('/usuarios', (req, res) => {
       return res.status(500).json({ mensaje: 'Error al obtener usuarios' });
     }
 
-    res.json({ usuarios: results });
+    res.json(results);
   });
 });
 
