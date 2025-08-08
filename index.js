@@ -478,3 +478,23 @@ app.delete('/productos/:id', (req, res) => {
     res.json({ mensaje: 'Producto eliminado correctamente' });
   });
 });
+
+
+
+// OBTENER UN PRODUCTO POR ID
+app.get('/productos/:id', (req, res) => {
+  const id = req.params.id;
+
+  connection.query('SELECT * FROM productos WHERE id = ?', [id], (error, resultados) => {
+    if (error) {
+      console.error('Error al obtener el producto:', error);
+      return res.status(500).json({ mensaje: 'Error del servidor' });
+    }
+
+    if (resultados.length === 0) {
+      return res.status(404).json({ mensaje: 'Producto no encontrado' });
+    }
+
+    res.json(resultados[0]); // ← devuelve solo un producto
+  });
+});
