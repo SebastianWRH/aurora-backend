@@ -407,7 +407,7 @@ app.get('/usuarios', (req, res) => {
       console.error('Error al obtener usuarios:', err);
       return res.status(500).json({ mensaje: 'Error al obtener usuarios' });
     }
-    console.log("prueba pendeja");
+    console.log("LOS USUARIOS SON");
     res.json({ usuarios: results });
   });
 });
