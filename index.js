@@ -489,7 +489,7 @@ app.delete('/productos/:id', (req, res) => {
 
 // OBTENER UN PRODUCTO POR ID
 app.get('/productos', (req, res) => {
-  connection.query('SELECT id, nombre, descripcion, precio, categoria, stock, miniatura FROM productos', (err, results) => {
+  connection.query('SELECT id, nombre, descripcion, precio, categoria, stock, miniatura, imagenes FROM productos', (err, results) => {
     if (err) {
       console.error('Error al obtener productos:', err);
       return res.status(500).json({ mensaje: 'Error al obtener productos' });
