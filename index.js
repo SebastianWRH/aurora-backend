@@ -413,3 +413,68 @@ app.get('/usuarios', (req, res) => {
   });
 });
 
+
+
+
+
+
+
+app.post('/productos', (req, res) => {
+  const { nombre, descripcion, precio, categoria, stock, miniatura, imagenes } = req.body;
+  const imagenesJSON = JSON.stringify(imagenes || []);
+
+  const query = `INSERT INTO productos (nombre, descripcion, precio, categoria, stock, miniatura, imagenes)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+  connection.query(query, [nombre, descripcion, precio, categoria, stock, miniatura, imagenesJSON], (err, result) => {
+    if (err) {
+      console.error('Error al agregar producto:', err);
+      return res.status(500).json({ mensaje: 'Error al agregar producto' });
+    }
+    res.json({ mensaje: 'Producto agregado correctamente' });
+  });
+});
+
+
+
+
+
+
+
+
+app.put('/productos/:id', (req, res) => {
+  const { id } = req.params;
+  const { nombre, descripcion, precio, categoria, stock, miniatura, imagenes } = req.body;
+  const imagenesJSON = JSON.stringify(imagenes || []);
+
+  const query = `UPDATE productos SET nombre=?, descripcion=?, precio=?, categoria=?, stock=?, miniatura=?, imagenes=?
+                 WHERE id=?`;
+
+  connection.query(query, [nombre, descripcion, precio, categoria, stock, miniatura, imagenesJSON, id], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar producto:', err);
+      return res.status(500).json({ mensaje: 'Error al actualizar producto' });
+    }
+    res.json({ mensaje: 'Producto actualizado correctamente' });
+  });
+});
+
+
+
+
+
+
+
+
+app.delete('/productos/:id', (req, res) => {
+  const { id } = req.params;
+
+  const query = 'DELETE FROM productos WHERE id = ?';
+  connection.query(query, [id], (err, result) => {
+    if (err) {
+      console.error('Error al eliminar producto:', err);
+      return res.status(500).json({ mensaje: 'Error al eliminar producto' });
+    }
+    res.json({ mensaje: 'Producto eliminado correctamente' });
+  });
+});
