@@ -418,22 +418,20 @@ app.get('/usuarios', (req, res) => {
 
 
 
-
+// Crear producto
 app.post('/productos', (req, res) => {
   const { nombre, descripcion, precio, categoria, stock, miniatura, imagenes } = req.body;
-  const imagenesJSON = JSON.stringify(imagenes || []);
 
-  const query = `INSERT INTO productos (nombre, descripcion, precio, categoria, stock, miniatura, imagenes)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
-
-  connection.query(query, [nombre, descripcion, precio, categoria, stock, miniatura, imagenesJSON], (err, result) => {
+  const sql = 'INSERT INTO productos (nombre, descripcion, precio, categoria, stock, miniatura, imagenes) VALUES (?, ?, ?, ?, ?, ?, ?)';
+  connection.query(sql, [nombre, descripcion, precio, categoria, stock, miniatura, JSON.stringify(imagenes)], (err, result) => {
     if (err) {
-      console.error('Error al agregar producto:', err);
-      return res.status(500).json({ mensaje: 'Error al agregar producto' });
+      console.error('❌ Error al insertar producto:', err);
+      return res.status(500).json({ error: 'Error al insertar producto' });
     }
-    res.json({ mensaje: 'Producto agregado correctamente' });
+    res.json({ mensaje: 'Producto agregado correctamente', id: result.insertId });
   });
 });
+
 
 
 
