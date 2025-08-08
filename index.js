@@ -488,14 +488,29 @@ app.delete('/productos/:id', (req, res) => {
 
 
 // OBTENER UN PRODUCTO POR ID
-app.get('/productos', (req, res) => {
-  connection.query('SELECT id, nombre, descripcion, precio, categoria, stock, miniatura, imagenes FROM productos', (err, results) => {
+app.get('/productos/:id', (req, res) => {
+  const { id } = req.params;
+
+  connection.query('SELECT * FROM productos WHERE id = ?', [id], (err, resultados) => {
     if (err) {
-      console.error('Error al obtener productos:', err);
-      return res.status(500).json({ mensaje: 'Error al obtener productos' });
+      console.error('Error al obtener producto por ID:', err);
+      return res.status(500).json({ mensaje: 'Error al obtener producto' });
     }
 
-    res.json({ productos: results });
+    if (resultados.length === 0) {
+      return res.status(404).json({ mensaje: 'Producto no encontrado' });
+    }
+
+    const producto = resultados[0];
+
+    // Parsear imágenes (si es necesario)
+    try {
+      producto.imagenes = JSON.parse(producto.imagenes);
+    } catch {
+      producto.imagenes = [];
+    }
+
+    res.json(producto);
   });
 });
 
