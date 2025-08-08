@@ -146,6 +146,7 @@ app.get('/productos', (req, res) => {
 });
 
 
+
 // Obtener producto por id
 app.get('/producto/:id', async (req, res) => {
   const { id } = req.params;
