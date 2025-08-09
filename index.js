@@ -3,11 +3,17 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const connection = require('./db'); // tu conexión a MySQL
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+const JWT_SECRET = 'Jz!4pWq9#XeL@1vGm2Rb';
 
 // REGISTRO
 app.post('/registro', async (req, res) => {
@@ -57,7 +63,6 @@ app.post('/registro', async (req, res) => {
 
 
 
-// LOGIN
 app.post('/login', (req, res) => {
   const { correo, contrasena } = req.body;
 
@@ -76,7 +81,24 @@ app.post('/login', (req, res) => {
       return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
     }
 
+    // Crear token JWT con datos del usuario (puedes incluir solo lo necesario)
+    const token = jwt.sign(
+      { id: usuario.id, correo: usuario.correo, nombre: usuario.nombre },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Enviar token en cookie segura (httpOnly para que no pueda accederse desde JS)
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // solo en producción HTTPS
+      maxAge: 3600000, // 1 hora en milisegundos
+      sameSite: 'strict'
+    });
+
+    // No enviar la contraseña al cliente
     const { contrasena: _, ...usuarioSinContra } = usuario;
+
     res.status(200).json({
       mensaje: 'Login exitoso',
       usuario: usuarioSinContra
@@ -84,8 +106,9 @@ app.post('/login', (req, res) => {
   });
 });
 
+
 // OBTENER PERFIL
-app.get('/usuario/:id', (req, res) => {
+app.get('/usuario/:id', verificarToken, (req, res) => {
   const id = req.params.id;
   const query = 'SELECT * FROM usuarios WHERE id = ?';
   connection.query(query, [id], (err, results) => {
@@ -514,3 +537,24 @@ app.get('/productos/:id', (req, res) => {
   });
 });
 
+
+
+
+
+const jwt = require('jsonwebtoken');
+
+function verificarToken(req, res, next) {
+  const token = req.cookies.token; // obtenemos la cookie 'token'
+
+  if (!token) {
+    return res.status(401).json({ mensaje: 'No autorizado, token faltante' });
+  }
+
+  try {
+    const datos = jwt.verify(token, JWT_SECRET);
+    req.usuario = datos; // guardamos los datos del usuario en req.usuario
+    next(); // continuar con la ruta
+  } catch (error) {
+    return res.status(401).json({ mensaje: 'Token inválido o expirado' });
+  }
+}
