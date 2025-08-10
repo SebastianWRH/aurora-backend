@@ -580,7 +580,6 @@ app.post('/logout', (req, res) => {
 
 
 
-// routes/pagar.js
 import express from 'express';
 import fetch from 'node-fetch';
 
@@ -599,7 +598,7 @@ router.post('/pagar', async (req, res) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer sk_test_ojtcceAeuh8NIIeG' // 🔹 Cambia por tu llave secreta
+                'Authorization': `Bearer ${process.env.CULQI_SECRET_KEY}` // 🔹 Usar variable de entorno
             },
             body: JSON.stringify({
                 amount: Math.round(monto * 100), // Culqi usa céntimos
@@ -611,7 +610,8 @@ router.post('/pagar', async (req, res) => {
 
         const pago = await culqiRes.json();
 
-        if (!(culqiRes.ok && pago.object === 'charge')) {
+        // Validar que el pago fue exitoso
+        if (!(culqiRes.ok && pago.object === 'charge' && pago.outcome && pago.outcome.type === 'venta_exitosa')) {
             return res.status(400).json({ success: false, error: pago });
         }
 
