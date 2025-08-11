@@ -571,79 +571,19 @@ app.post('/logout', (req, res) => {
 });
 
 
-
-
-
-
-
-
-
-
-
 import express from 'express';
-import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import pagosRoutes from './routes/pagos.js';
 
 dotenv.config();
+
+// Middleware para leer JSON
 app.use(express.json());
 
-// Ruta para procesar el pago
-app.post('/pagar', async (req, res) => {
-    const { token, monto, email, id_usuario, items } = req.body;
+// Conectar la ruta de pagos
+app.use(pagosRoutes);
 
-    if (!token || !monto || !email || !id_usuario || !items) {
-        return res.status(400).json({ success: false, error: 'Faltan datos para procesar el pago.' });
-    }
-
-    try {
-        // 1️⃣ Cobrar con Culqi
-        const culqiRes = await fetch('https://api.culqi.com/v2/charges', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.CULQI_SECRET_KEY}`
-            },
-            body: JSON.stringify({
-                amount: Math.round(monto * 100), // Culqi usa céntimos
-                currency_code: 'PEN',
-                email: email,
-                source_id: token
-            })
-        });
-
-        const pago = await culqiRes.json();
-
-        // Validar que el pago fue exitoso
-        if (!(culqiRes.ok && pago.object === 'charge' && pago.outcome && pago.outcome.type === 'venta_exitosa')) {
-            return res.status(400).json({ success: false, error: pago });
-        }
-
-        // 2️⃣ Crear el pedido en tu backend
-        const pedidoRes = await fetch('https://aurora-backend-ve7u.onrender.com/pedido', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id_usuario,
-                total: monto,
-                items
-            })
-        });
-
-        const pedidoData = await pedidoRes.json();
-
-        if (!pedidoRes.ok) {
-            return res.status(400).json({ success: false, error: pedidoData });
-        }
-
-        // 3️⃣ Respuesta final
-        res.json({
-            success: true,
-            pago,
-            pedido: pedidoData
-        });
-
-    } catch (error) {
-        console.error('Error procesando pago y pedido:', error);
-        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
-    }
+// Levantar el servidor
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
 });
