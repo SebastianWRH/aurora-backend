@@ -582,10 +582,15 @@ app.post('/logout', (req, res) => {
 
 import express from 'express';
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
 
-const router = express.Router();
+dotenv.config();
 
-router.post('/pagar', async (req, res) => {
+const app = express();
+app.use(express.json());
+
+// Ruta para procesar el pago
+app.post('/pagar', async (req, res) => {
     const { token, monto, email, id_usuario, items } = req.body;
 
     if (!token || !monto || !email || !id_usuario || !items) {
@@ -598,7 +603,7 @@ router.post('/pagar', async (req, res) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.CULQI_SECRET_KEY}` // 🔹 Usar variable de entorno
+                'Authorization': `Bearer ${process.env.CULQI_SECRET_KEY}`
             },
             body: JSON.stringify({
                 amount: Math.round(monto * 100), // Culqi usa céntimos
@@ -645,8 +650,10 @@ router.post('/pagar', async (req, res) => {
     }
 });
 
-export default router;
-
-
+// Servidor en puerto 3000 (o el que definas en .env)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor escuchando en puerto ${PORT}`);
+});
 
 
