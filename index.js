@@ -585,8 +585,6 @@ import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-const app = express();
 app.use(express.json());
 
 // Ruta para procesar el pago
@@ -649,11 +647,3 @@ app.post('/pagar', async (req, res) => {
         res.status(500).json({ success: false, error: 'Error interno del servidor.' });
     }
 });
-
-// Servidor en puerto 3000 (o el que definas en .env)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor escuchando en puerto ${PORT}`);
-});
-
-
