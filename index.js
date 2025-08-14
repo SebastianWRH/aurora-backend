@@ -613,8 +613,55 @@ app.post('/pagar', async (req, res) => {
             return res.status(500).json({ error: data });
         }
 
-        // Aquí opcionalmente guardas pedido en DB usando id_usuario y items
-        res.json({ success: true, pedido: { id: data.id, status: data.outcome?.type }, data });
+       // ---------------------------
+        // 2️⃣ Iniciar transacción en MySQL
+        // ---------------------------
+        connection.beginTransaction(err => {
+            if (err) throw err;
+
+            // ---------------------------
+            // 3️⃣ Insertar pedido
+            // ---------------------------
+            const qPedido = "INSERT INTO pedidos (id_usuario, total, fecha, status) VALUES (?, ?, NOW(), ?)";
+            connection.query(qPedido, [id_usuario, amount, data.outcome?.type || 'exitoso'], (err, result) => {
+                if (err) return connection.rollback(() => res.status(500).json({ mensaje: "Error creando pedido" }));
+
+                const idPedido = result.insertId;
+
+                // ---------------------------
+                // 4️⃣ Restar stock de cada producto
+                // ---------------------------
+                const queriesStock = items.map(item => {
+                    return new Promise((resolve, reject) => {
+                        const qStock = "UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?";
+                        connection.query(qStock, [item.cantidad, item.id_producto, item.cantidad], (err, result) => {
+                            if (err) return reject(err);
+                            if (result.affectedRows === 0) {
+                                return reject(new Error(`Stock insuficiente para el producto ${item.id_producto}`));
+                            }
+                            resolve();
+                        });
+                    });
+                });
+
+                // ---------------------------
+                // 5️⃣ Ejecutar todas las consultas de stock y commit
+                // ---------------------------
+                Promise.all(queriesStock)
+                    .then(() => {
+                        connection.commit(commitErr => {
+                            if (commitErr) {
+                                return connection.rollback(() => res.status(500).json({ mensaje: "Error en la transacción" }));
+                            }
+                            // ✅ Pedido creado y stock actualizado
+                            res.json({ success: true, pedido: { id: idPedido, status: data.outcome?.type }, data });
+                        });
+                    })
+                    .catch(stockErr => {
+                        connection.rollback(() => res.status(400).json({ mensaje: stockErr.message }));
+                    });
+            });
+        });
 
     } catch (error) {
         console.error('Error al procesar el pago:', error);
