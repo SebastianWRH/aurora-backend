@@ -567,7 +567,6 @@ app.post('/logout', (req, res) => {
   res.status(200).json({ mensaje: 'Logout exitoso' });
 });
 
-const cors = require('cors');
 const fetch = require('node-fetch');
 const dotenv = require('dotenv');
 
