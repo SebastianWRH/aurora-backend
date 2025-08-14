@@ -606,7 +606,7 @@ app.post('/pagar', async (req, res) => {
 
         const data = await response.json();
 
-        
+
 
         if (!response.ok) {
             console.error('Error de Culqi:', data);
