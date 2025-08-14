@@ -571,20 +571,53 @@ app.post('/logout', (req, res) => {
 });
 
 import express from 'express';
+import cors from 'cors';
+import fetch from 'node-fetch';
 import dotenv from 'dotenv';
-import pagosRoutes from './routes/pagos.js';
 
-dotenv.config();
+dotenv.config(); // Cargar variables de entorno desde .env
 
-// Middleware para leer JSON
+app.use(cors());
 app.use(express.json());
 
-// Conectar la ruta de pagos bajo "/api"
-app.use('/api', pagosRoutes);
 
-// Levantar el servidor
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
+// Ruta de prueba para ver que el backend responde
+app.get('/', (req, res) => {
+    res.send('Servidor de pagos activo ✅');
 });
 
+// Ruta para procesar pago
+app.post('/pagar', async (req, res) => {
+    const { token, amount, currency_code, email } = req.body;
 
+    if (!token || !amount || !currency_code || !email) {
+        return res.status(400).json({ error: 'Faltan datos del pago' });
+    }
+
+    try {
+        const response = await fetch('https://api.culqi.com/v2/charges', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.CULQI_PRIVATE_KEY}` // Private Key segura
+            },
+            body: JSON.stringify({
+                amount, // en céntimos: 1000 = S/ 10.00
+                currency_code,
+                email,
+                source_id: token
+            })
+        });
+
+        const data = await response.json();
+        res.json(data);
+
+    } catch (error) {
+        console.error('Error al procesar el pago:', error);
+        res.status(500).json({ error: 'Error interno al procesar el pago' });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Servidor escuchando en http://localhost:${PORT}`);
+});
