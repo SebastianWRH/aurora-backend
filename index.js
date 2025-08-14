@@ -579,11 +579,12 @@ dotenv.config();
 // Middleware para leer JSON
 app.use(express.json());
 
-// Conectar la ruta de pagos
-app.use(pagosRoutes);
+// Conectar la ruta de pagos bajo "/api"
+app.use('/api', pagosRoutes);
 
 // Levantar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+
 
