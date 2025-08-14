@@ -567,10 +567,9 @@ app.post('/logout', (req, res) => {
   res.status(200).json({ mensaje: 'Logout exitoso' });
 });
 
-import express from 'express';
-import cors from 'cors';
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
+const cors = require('cors');
+const fetch = require('node-fetch');
+const dotenv = require('dotenv');
 
 dotenv.config(); // Cargar variables de entorno desde .env
 
