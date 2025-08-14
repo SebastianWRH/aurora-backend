@@ -540,9 +540,6 @@ app.get('/productos/:id', (req, res) => {
 
 
 
-
-const jwt = require('jsonwebtoken');
-
 function verificarToken(req, res, next) {
   const token = req.cookies.token; // obtenemos la cookie 'token'
 
