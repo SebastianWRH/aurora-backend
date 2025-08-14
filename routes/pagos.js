@@ -1,3 +1,4 @@
+// routes/pagos.js
 import express from 'express';
 import fetch from 'node-fetch';
 
@@ -11,6 +12,7 @@ router.post('/pagar', async (req, res) => {
     }
 
     try {
+        // Crear cargo en Culqi
         const culqiRes = await fetch('https://api.culqi.com/v2/charges', {
             method: 'POST',
             headers: {
@@ -18,43 +20,36 @@ router.post('/pagar', async (req, res) => {
                 'Authorization': `Bearer ${process.env.CULQI_SECRET_KEY}`
             },
             body: JSON.stringify({
-                amount: Math.round(monto * 100),
+                amount: Math.round(monto * 100), // En céntimos
                 currency_code: 'PEN',
-                email: email,
+                email,
                 source_id: token
             })
         });
 
         const pago = await culqiRes.json();
 
-        if (!(culqiRes.ok && pago.object === 'charge' && pago.outcome && pago.outcome.type === 'venta_exitosa')) {
+        if (!(culqiRes.ok && pago.object === 'charge')) {
             return res.status(400).json({ success: false, error: pago });
         }
 
-        const pedidoRes = await fetch('https://aurora-backend-ve7u.onrender.com/pedido', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id_usuario,
-                total: monto,
-                items
-            })
-        });
-
-        const pedidoData = await pedidoRes.json();
-
-        if (!pedidoRes.ok) {
-            return res.status(400).json({ success: false, error: pedidoData });
-        }
+        // Aquí podrías guardar el pedido en tu BD
+        // Ejemplo: llamar a otro endpoint
+        const pedido = {
+            id: Date.now(), // Simulación de ID
+            id_usuario,
+            total: monto,
+            items
+        };
 
         res.json({
             success: true,
             pago,
-            pedido: pedidoData
+            pedido
         });
 
     } catch (error) {
-        console.error('Error procesando pago y pedido:', error);
+        console.error('Error procesando pago:', error);
         res.status(500).json({ success: false, error: 'Error interno del servidor.' });
     }
 });

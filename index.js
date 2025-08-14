@@ -570,7 +570,6 @@ app.post('/logout', (req, res) => {
   res.status(200).json({ mensaje: 'Logout exitoso' });
 });
 
-
 import express from 'express';
 import dotenv from 'dotenv';
 import pagosRoutes from './routes/pagos.js';
