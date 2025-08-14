@@ -583,7 +583,7 @@ app.get('/', (req, res) => {
 
 // Ruta para procesar pago
 app.post('/pagar', async (req, res) => {
-    const { token, amount, currency_code, email } = req.body;
+    const { token, amount, currency_code, email, id_usuario, items } = req.body;
 
     if (!token || !amount || !currency_code || !email) {
         return res.status(400).json({ error: 'Faltan datos del pago' });
@@ -594,10 +594,10 @@ app.post('/pagar', async (req, res) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer sk_test_ojtcceAeuh8NIIeG` // Private Key segura
+                'Authorization': `Bearer sk_test_ojtcceAeuh8NIIeG`
             },
             body: JSON.stringify({
-                amount, // en céntimos: 1000 = S/ 10.00
+                amount,
                 currency_code,
                 email,
                 source_id: token
@@ -605,14 +605,17 @@ app.post('/pagar', async (req, res) => {
         });
 
         const data = await response.json();
-        res.json(data);
+
+        if (!response.ok) {
+            console.error('Error de Culqi:', data);
+            return res.status(500).json({ error: data });
+        }
+
+        // Aquí opcionalmente guardas pedido en DB usando id_usuario y items
+        res.json({ success: true, pedido: { id: data.id, status: data.outcome?.type }, data });
 
     } catch (error) {
         console.error('Error al procesar el pago:', error);
         res.status(500).json({ error: 'Error interno al procesar el pago' });
     }
-});
-
-app.listen(PORT, () => {
-    console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
