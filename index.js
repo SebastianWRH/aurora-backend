@@ -567,6 +567,7 @@ app.post('/logout', (req, res) => {
   res.status(200).json({ mensaje: 'Logout exitoso' });
 });
 
+const fetch = require('node-fetch');
 const dotenv = require('dotenv');
 
 dotenv.config(); // Cargar variables de entorno desde .env
@@ -581,19 +582,22 @@ app.get('/', (req, res) => {
 });
 
 // Ruta para procesar pago
+// Ruta para procesar pago
 app.post('/pagar', async (req, res) => {
     const { token, amount, currency_code, email, id_usuario, items } = req.body;
 
+    // Validación básica
     if (!token || !amount || !currency_code || !email) {
         return res.status(400).json({ error: 'Faltan datos del pago' });
     }
 
     try {
+        // Usamos fetch nativo de Node (18+)
         const response = await fetch('https://api.culqi.com/v2/charges', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer sk_test_ojtcceAeuh8NIIeG`
+                'Authorization': `Bearer ${process.env.CULQI_SECRET_KEY || 'sk_test_ojtcceAeuh8NIIeG'}`
             },
             body: JSON.stringify({
                 amount,
@@ -605,15 +609,25 @@ app.post('/pagar', async (req, res) => {
 
         const data = await response.json();
 
-
-
         if (!response.ok) {
             console.error('Error de Culqi:', data);
             return res.status(500).json({ error: data });
         }
 
-        // Aquí opcionalmente guardas pedido en DB usando id_usuario y items
-        res.json({ success: true, pedido: { id: data.id, status: data.outcome?.type }, data });
+        // Aquí puedes guardar el pedido en tu DB
+        // Ejemplo rápido (sin transacción):
+        /*
+        const q = 'INSERT INTO pedidos (id_usuario, total) VALUES (?, ?)';
+        const result = await connection.promise().query(q, [id_usuario, amount / 100]);
+        const idPedido = result[0].insertId;
+        */
+
+        // Respondemos al frontend con éxito
+        res.json({
+            success: true,
+            pedido: { id: data.id, status: data.outcome?.type },
+            data
+        });
 
     } catch (error) {
         console.error('Error al procesar el pago:', error);
