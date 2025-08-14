@@ -599,7 +599,7 @@ app.post('/pagar', async (req, res) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.CULQI_PRIVATE_KEY}` // Private Key segura
+                'Authorization': `Bearer sk_test_ojtcceAeuh8NIIeG` // Private Key segura
             },
             body: JSON.stringify({
                 amount, // en céntimos: 1000 = S/ 10.00
