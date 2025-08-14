@@ -621,3 +621,44 @@ app.post('/pagar', async (req, res) => {
         res.status(500).json({ error: 'Error interno al procesar el pago' });
     }
 });
+
+
+
+
+
+
+
+// Ruta para restar stock de varios productos
+app.post('/restar-stock', (req, res) => {
+  const items = req.body.items; // [{ id_producto, cantidad }, ...]
+
+  if (!items || !items.length) return res.status(400).json({ mensaje: 'No hay items' });
+
+  connection.beginTransaction(err => {
+    if (err) return res.status(500).json({ mensaje: 'Error al iniciar transacción' });
+
+    const queriesStock = items.map(it => {
+      return new Promise((resolve, reject) => {
+        const qStock = 'UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?';
+        connection.query(qStock, [it.cantidad, it.id_producto, it.cantidad], (err, result) => {
+          if (err) return reject(err);
+          if (result.affectedRows === 0) return reject(new Error(`Stock insuficiente para el producto ${it.id_producto}`));
+          resolve();
+        });
+      });
+    });
+
+    Promise.all(queriesStock)
+      .then(() => {
+        connection.commit(commitErr => {
+          if (commitErr) {
+            return connection.rollback(() => res.status(500).json({ mensaje: 'Error en la transacción' }));
+          }
+          res.json({ mensaje: 'Stock actualizado' });
+        });
+      })
+      .catch(stockErr => {
+        connection.rollback(() => res.status(400).json({ mensaje: stockErr.message }));
+      });
+  });
+});
