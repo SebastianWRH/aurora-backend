@@ -640,9 +640,9 @@ app.post('/restar-stock', (req, res) => {
     const queriesStock = items.map(it => {
       return new Promise((resolve, reject) => {
         const qStock = 'UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?';
-        connection.query(qStock, [it.cantidad, it.id_producto, it.cantidad], (err, result) => {
+        connection.query(qStock, [it.cantidad, it.id, it.cantidad], (err, result) => {
           if (err) return reject(err);
-          if (result.affectedRows === 0) return reject(new Error(`Stock insuficiente para el producto ${it.id_producto}`));
+          if (result.affectedRows === 0) return reject(new Error(`Stock insuficiente para el producto ${it.id}`));
           resolve();
         });
       });
