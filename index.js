@@ -567,7 +567,6 @@ app.post('/logout', (req, res) => {
   res.status(200).json({ mensaje: 'Logout exitoso' });
 });
 
-const fetch = require('node-fetch');
 const dotenv = require('dotenv');
 
 dotenv.config(); // Cargar variables de entorno desde .env
