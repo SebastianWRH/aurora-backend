@@ -662,3 +662,35 @@ app.post('/restar-stock', (req, res) => {
       });
   });
 });
+
+
+// Buscar productos por nombre o descripción
+app.get('/buscar-productos', (req, res) => {
+  const { query } = req.query;
+
+  if (!query) return res.json([]); // Si no hay búsqueda, devuelve vacío
+
+  const sql = `
+    SELECT * FROM productos 
+    WHERE nombre LIKE ? OR descripcion LIKE ?
+  `;
+  const likeQuery = `%${query}%`;
+
+  connection.query(sql, [likeQuery, likeQuery], (err, results) => {
+    if (err) {
+      console.error('Error en búsqueda de productos:', err);
+      return res.status(500).json({ mensaje: 'Error al buscar productos' });
+    }
+
+    const productos = results.map(p => {
+      try {
+        p.imagenes = JSON.parse(p.imagenes);
+      } catch {
+        p.imagenes = [];
+      }
+      return p;
+    });
+
+    res.json(productos);
+  });
+});
